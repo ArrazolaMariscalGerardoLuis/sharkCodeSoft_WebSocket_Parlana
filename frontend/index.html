@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parlana Enterprise</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <h1>Parlana Enterprise</h1>
+            <div class="status">
+                <span>Chat colaborativo en tiempo real</span>
+                <div class="connection-status">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span id="statusText">Desconectado</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="user-info">
+                    <strong>Tu perfil</strong>
+                    <div class="username-input-container">
+                        <input type="text" id="usernameInput" placeholder="Tu nombre de usuario">
+                        <button class="change-name-btn" id="changeNameBtn">Cambiar</button>
+                    </div>
+                    <small id="userId">ID: ...</small>
+                </div>
+                
+                <div class="active-users">
+                    <h3>Usuarios Conectados (<span id="userCount">0</span>)</h3>
+                    <ul class="user-list" id="userList"></ul>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="messages-container" id="messagesContainer">
+                    <div class="system-message">
+                        Bienvenido al chat. Conectando...
+                    </div>
+                </div>
+                
+                <div class="typing-indicator" id="typingIndicator"></div>
+                
+                <div class="input-container">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Escribe tu mensaje..." 
+                        rows="1"
+                        disabled
+                    ></textarea>
+                    <button class="send-button" id="sendButton" disabled>Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
