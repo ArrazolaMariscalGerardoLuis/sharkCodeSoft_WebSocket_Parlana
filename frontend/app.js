@@ -106,14 +106,24 @@ class Parlana {
     }
 
     handleConnectionSuccess() {
-        this.isConnected = true;
-        this.reconnectAttempts = 0;
-        this.updateConnectionStatus('Conectado', true);
-        this.messageInput.disabled = false;
-        this.sendButton.disabled = false;
-        
-        this.addSystemMessage('Conectado al chat');
-    }
+    this.isConnected = true;
+    this.reconnectAttempts = 0;
+    this.updateConnectionStatus('Conectado', true);
+    this.messageInput.disabled = false;
+    this.sendButton.disabled = false;
+    
+    this.addSystemMessage('Conectado al chat');
+    
+    // ✅ SOLICITAR LISTA DE USUARIOS SI NO LLEGA EN 2 SEGUNDOS
+    setTimeout(() => {
+        if (this.currentUserList.length === 0) {
+            console.log('🔄 Solicitando lista de usuarios...');
+            this.send({
+                type: 'get_active_users'
+            });
+        }
+    }, 2000);
+}
 
     handleDisconnection() {
         this.isConnected = false;
@@ -153,9 +163,18 @@ class Parlana {
 
         switch (message.type) {
             case 'user_info':
-                this.user = message.user;
-                this.updateUserInfo();
-                break;
+    this.user = message.user;
+    this.updateUserInfo();
+    
+    // ✅ AÑADIR: Actualizar lista de usuarios si viene en el mensaje
+    if (message.activeUsers) {
+        console.log('✅ Recibiendo lista inicial de usuarios:', message.activeUsers);
+        this.updateUserList(message.activeUsers);
+    } else {
+        console.log('⚠️ user_info sin activeUsers, solicitando lista completa...');
+        // Si no viene, podrías pedirla al servidor
+    }
+    break;
                 
             case 'message_history':
                 this.loadMessageHistory(message.data);
@@ -260,44 +279,48 @@ class Parlana {
     }
 
     updateUserList(users) {
-        console.log('🔄 Actualizando lista de usuarios:', users);
-        
-        // ✅ SOLUCIÓN: Si users es undefined, NO hacer nada
-        if (!users || !Array.isArray(users)) {
-            console.warn('⚠️ Lista de usuarios inválida, manteniendo lista actual');
-            return; // ¡NO borrar la lista!
+    console.log('🔄 Actualizando lista de usuarios:', users);
+    
+    // ✅ MEJORAR la validación
+    if (!users || !Array.isArray(users) || users.length === 0) {
+        console.warn('⚠️ Lista de usuarios inválida o vacía, mostrando lista actual');
+        // En lugar de no hacer nada, mostrar mensaje
+        if (this.currentUserList.length === 0) {
+            this.userList.innerHTML = '<li class="user-item">No hay usuarios conectados</li>';
+        }
+        return;
+    }
+    
+    // ✅ Guardar la lista actual
+    this.currentUserList = users;
+    
+    this.userCount.textContent = users.length;
+    this.userList.innerHTML = '';
+    
+    users.forEach(user => {
+        if (!user || !user.id || !user.username) {
+            console.warn('⚠️ Usuario inválido:', user);
+            return;
         }
         
-        // ✅ Guardar la lista actual
-        this.currentUserList = users;
+        const userItem = document.createElement('li');
+        userItem.className = 'user-item';
         
-        this.userCount.textContent = users.length;
-        this.userList.innerHTML = '';
+        const isCurrentUser = this.user && user.id === this.user.id;
+        if (isCurrentUser) {
+            userItem.style.background = '#e3f2fd';
+            userItem.style.border = '1px solid #3498db';
+        }
         
-        users.forEach(user => {
-            if (!user || !user.id || !user.username) {
-                console.warn('⚠️ Usuario inválido:', user);
-                return;
-            }
-            
-            const userItem = document.createElement('li');
-            userItem.className = 'user-item';
-            
-            const isCurrentUser = this.user && user.id === this.user.id;
-            if (isCurrentUser) {
-                userItem.style.background = '#e3f2fd';
-                userItem.style.border = '1px solid #3498db';
-            }
-            
-            userItem.innerHTML = `
-                <div class="user-avatar" style="background: ${isCurrentUser ? '#3498db' : '#2ecc71'}"></div>
-                <span>${this.escapeHtml(user.username)} ${isCurrentUser ? '(Tú)' : ''}</span>
-            `;
-            this.userList.appendChild(userItem);
-        });
-        
-        console.log('✅ Lista de usuarios actualizada');
-    }
+        userItem.innerHTML = `
+            <div class="user-avatar" style="background: ${isCurrentUser ? '#3498db' : '#2ecc71'}"></div>
+            <span>${this.escapeHtml(user.username)} ${isCurrentUser ? '(Tú)' : ''}</span>
+        `;
+        this.userList.appendChild(userItem);
+    });
+    
+    console.log('✅ Lista de usuarios actualizada con', users.length, 'usuarios');
+}
 
     // ✅ NUEVO MÉTODO: Actualizar solo un usuario específico
     updateSingleUser(updatedUser) {

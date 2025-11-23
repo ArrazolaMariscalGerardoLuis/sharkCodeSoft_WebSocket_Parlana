@@ -21,25 +21,27 @@ class ChatServer {
 
             this.clients.set(ws, user);
             console.log(`✅ Usuario conectado: ${user.username}`);
+            console.log('👥 Total de usuarios:', this.clients.size);
 
-            // Enviar información del usuario
+            // 1. ENVIAR INFORMACIÓN DEL USUARIO CON LA LISTA ACTUAL
             this.sendToClient(ws, {
                 type: 'user_info',
-                user: user
+                user: user,
+                activeUsers: this.getActiveUsers() // ✅ LISTA COMPLETA
             });
 
-            // Enviar historial de mensajes
+            // 2. ENVIAR HISTORIAL
             this.sendToClient(ws, {
                 type: 'message_history',
                 data: this.messageHistory
             });
 
-            // Notificar a todos que un usuario se unió
+            // 3. NOTIFICAR A TODOS CON LISTA ACTUALIZADA
             this.broadcastToAll({
                 type: 'user_joined',
                 user: { id: user.id, username: user.username },
                 message: `${user.username} se ha unido al chat`,
-                activeUsers: this.getActiveUsers()
+                activeUsers: this.getActiveUsers() // ✅ LISTA ACTUALIZADA
             });
 
             ws.on('message', (data) => {
@@ -97,7 +99,7 @@ class ChatServer {
                         type: 'username_changed',
                         user: { id: user.id, username: user.username },
                         message: `${oldUsername} ahora es ${newUsername}`,
-                        activeUsers: this.getActiveUsers() // ✅ Siempre enviar activeUsers
+                        activeUsers: this.getActiveUsers() // ✅ LISTA ACTUALIZADA
                     };
 
                     this.broadcastToAll(changeMessage);
@@ -110,11 +112,19 @@ class ChatServer {
                 break;
 
             case 'typing':
-                this.broadcast({
-                    type: 'user_typing',
-                    user: { id: user.id, username: user.username },
-                    isTyping: message.isTyping
-                }, ws);
+    this.broadcastToAll({  // ✅ CORRECTO: usa broadcastToAll
+        type: 'user_typing',
+        user: { id: user.id, username: user.username },
+        isTyping: message.isTyping
+    });
+    break;
+
+            case 'get_active_users':
+                // ✅ NUEVO: Responder solicitud de lista de usuarios
+                this.sendToClient(ws, {
+                    type: 'active_users_list',
+                    activeUsers: this.getActiveUsers()
+                });
                 break;
         }
     }
@@ -124,12 +134,13 @@ class ChatServer {
         if (user) {
             this.clients.delete(ws);
             console.log(`❌ Usuario desconectado: ${user.username}`);
+            console.log('👥 Usuarios restantes:', this.clients.size);
 
             this.broadcastToAll({
                 type: 'user_left',
                 user: { id: user.id, username: user.username },
                 message: `${user.username} ha abandonado el chat`,
-                activeUsers: this.getActiveUsers()
+                activeUsers: this.getActiveUsers() // ✅ LISTA ACTUALIZADA
             });
 
             this.messageHistory.push({
@@ -165,6 +176,7 @@ class ChatServer {
     }
 
     start(port = 8080) {
+        this.setupWebSocket();
         this.server.listen(port, () => {
             console.log(`🚀 Servidor de chat ejecutándose en puerto ${port}`);
             console.log(`🔗 WebSocket disponible en ws://localhost:${port}`);
