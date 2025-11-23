@@ -1,10 +1,10 @@
-# 💬 Parlana Enterprise
+# 💬 Parlana
 
 Sistema de chat colaborativo en tiempo real construido con WebSocket.
 
 ## 📋 Descripción
 
-Parlana Enterprise es una aplicación web de chat que permite la comunicación instantánea entre múltiples usuarios mediante tecnología WebSocket. Incluye funcionalidades como cambio de nombre de usuario, historial de mensajes, lista de usuarios activos en tiempo real y reconexión automática.
+Parlana es una aplicación web de chat que permite la comunicación instantánea entre múltiples usuarios mediante tecnología WebSocket. Incluye funcionalidades como cambio de nombre de usuario, historial de mensajes, lista de usuarios activos en tiempo real y reconexión automática.
 
 ## ✨ Características
 
