@@ -20,14 +20,14 @@ class ChatServer {
             };
 
             this.clients.set(ws, user);
-            console.log(`✅ Usuario conectado: ${user.username}`);
-            console.log('👥 Total de usuarios:', this.clients.size);
+            console.log(`Usuario conectado: ${user.username}`);
+            console.log('Total de usuarios:', this.clients.size);
 
             // 1. ENVIAR INFORMACIÓN DEL USUARIO CON LA LISTA ACTUAL
             this.sendToClient(ws, {
                 type: 'user_info',
                 user: user,
-                activeUsers: this.getActiveUsers() // ✅ LISTA COMPLETA
+                activeUsers: this.getActiveUsers() //  LISTA COMPLETA
             });
 
             // 2. ENVIAR HISTORIAL
@@ -41,7 +41,7 @@ class ChatServer {
                 type: 'user_joined',
                 user: { id: user.id, username: user.username },
                 message: `${user.username} se ha unido al chat`,
-                activeUsers: this.getActiveUsers() // ✅ LISTA ACTUALIZADA
+                activeUsers: this.getActiveUsers() //  LISTA ACTUALIZADA
             });
 
             ws.on('message', (data) => {
@@ -99,7 +99,7 @@ class ChatServer {
                         type: 'username_changed',
                         user: { id: user.id, username: user.username },
                         message: `${oldUsername} ahora es ${newUsername}`,
-                        activeUsers: this.getActiveUsers() // ✅ LISTA ACTUALIZADA
+                        activeUsers: this.getActiveUsers() //  LISTA ACTUALIZADA
                     };
 
                     this.broadcastToAll(changeMessage);
@@ -112,7 +112,7 @@ class ChatServer {
                 break;
 
             case 'typing':
-    this.broadcastToAll({  // ✅ CORRECTO: usa broadcastToAll
+    this.broadcastToAll({  //  CORRECTO: usa broadcastToAll
         type: 'user_typing',
         user: { id: user.id, username: user.username },
         isTyping: message.isTyping
@@ -120,7 +120,7 @@ class ChatServer {
     break;
 
             case 'get_active_users':
-                // ✅ NUEVO: Responder solicitud de lista de usuarios
+                //  NUEVO: Responder solicitud de lista de usuarios
                 this.sendToClient(ws, {
                     type: 'active_users_list',
                     activeUsers: this.getActiveUsers()
@@ -133,14 +133,14 @@ class ChatServer {
         const user = this.clients.get(ws);
         if (user) {
             this.clients.delete(ws);
-            console.log(`❌ Usuario desconectado: ${user.username}`);
-            console.log('👥 Usuarios restantes:', this.clients.size);
+            console.log(` Usuario desconectado: ${user.username}`);
+            console.log(' Usuarios restantes:', this.clients.size);
 
             this.broadcastToAll({
                 type: 'user_left',
                 user: { id: user.id, username: user.username },
                 message: `${user.username} ha abandonado el chat`,
-                activeUsers: this.getActiveUsers() // ✅ LISTA ACTUALIZADA
+                activeUsers: this.getActiveUsers() //  LISTA ACTUALIZADA
             });
 
             this.messageHistory.push({
@@ -178,8 +178,8 @@ class ChatServer {
     start(port = 8080) {
         this.setupWebSocket();
         this.server.listen(port, () => {
-            console.log(`🚀 Servidor de chat ejecutándose en puerto ${port}`);
-            console.log(`🔗 WebSocket disponible en ws://localhost:${port}`);
+            console.log(` Servidor de chat ejecutándose en puerto ${port}`);
+            console.log(` WebSocket disponible en ws://localhost:${port}`);
         });
     }
 }
