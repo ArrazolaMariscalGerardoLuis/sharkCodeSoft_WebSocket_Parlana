@@ -1,14 +1,55 @@
 const WebSocket = require('ws');
 const http = require('http');
 const uuid = require('uuid');
+const fs = require('fs');
+const path = require('path');
 
 class ChatServer {
     constructor() {
-        this.server = http.createServer();
+        this.server = http.createServer((req, res) => this.handleHttpRequest(req, res));
         this.wss = new WebSocket.Server({ server: this.server });
         this.clients = new Map();
         this.messageHistory = [];
         this.maxHistory = 100;
+    }
+
+    handleHttpRequest(req, res) {
+        // Ruta base del frontend
+        const frontendPath = path.join(__dirname, '..', 'frontend');
+
+        // Si piden la raíz, servir index.html
+        let filePath = req.url === '/' ? '/index.html' : req.url;
+        filePath = path.join(frontendPath, filePath);
+
+        // Leer y servir el archivo
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                res.writeHead(404, { 'Content-Type': 'text/plain' });
+                res.end('404 - Archivo no encontrado');
+                return;
+            }
+
+            // Determinar tipo MIME
+            const mimeType = this.getMimeType(filePath);
+            res.writeHead(200, { 'Content-Type': mimeType });
+            res.end(data);
+        });
+    }
+
+    getMimeType(filePath) {
+        const ext = path.extname(filePath).toLowerCase();
+        const mimeTypes = {
+            '.html': 'text/html',
+            '.css': 'text/css',
+            '.js': 'application/javascript',
+            '.json': 'application/json',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.ico': 'image/x-icon'
+        };
+        return mimeTypes[ext] || 'application/octet-stream';
     }
 
     setupWebSocket() {
@@ -92,7 +133,7 @@ class ChatServer {
 
                 if (newUsername && newUsername !== oldUsername) {
                     console.log(`🔄 ${oldUsername} cambió a ${newUsername}`);
-                    
+
                     user.username = newUsername;
 
                     const changeMessage = {
@@ -112,12 +153,12 @@ class ChatServer {
                 break;
 
             case 'typing':
-    this.broadcastToAll({  //  CORRECTO: usa broadcastToAll
-        type: 'user_typing',
-        user: { id: user.id, username: user.username },
-        isTyping: message.isTyping
-    });
-    break;
+                this.broadcastToAll({  //  CORRECTO: usa broadcastToAll
+                    type: 'user_typing',
+                    user: { id: user.id, username: user.username },
+                    isTyping: message.isTyping
+                });
+                break;
 
             case 'get_active_users':
                 //  NUEVO: Responder solicitud de lista de usuarios
@@ -160,7 +201,7 @@ class ChatServer {
 
     broadcastToAll(message) {
         const messageStr = JSON.stringify(message);
-        
+
         this.clients.forEach((user, ws) => {
             if (ws.readyState === WebSocket.OPEN) {
                 ws.send(messageStr);
