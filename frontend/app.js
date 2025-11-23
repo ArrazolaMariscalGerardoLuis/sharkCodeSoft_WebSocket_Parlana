@@ -7,7 +7,7 @@ class Parlana {
         this.maxReconnectAttempts = 5;
         this.typingTimeout = null;
         this.isTyping = false;
-        this.currentUserList = []; // ✅ GUARDAR lista actual de usuarios
+        this.currentUserList = []; //  GUARDAR lista actual de usuarios
 
         this.initializeElements();
         this.connect();
@@ -114,10 +114,10 @@ class Parlana {
     
     this.addSystemMessage('Conectado al chat');
     
-    // ✅ SOLICITAR LISTA DE USUARIOS SI NO LLEGA EN 2 SEGUNDOS
+    //  SOLICITAR LISTA DE USUARIOS SI NO LLEGA EN 2 SEGUNDOS
     setTimeout(() => {
         if (this.currentUserList.length === 0) {
-            console.log('🔄 Solicitando lista de usuarios...');
+            console.log(' Solicitando lista de usuarios...');
             this.send({
                 type: 'get_active_users'
             });
@@ -159,20 +159,20 @@ class Parlana {
     }
 
     handleMessage(message) {
-        console.log('🔍 Mensaje recibido:', message.type, 'activeUsers:', message.activeUsers);
+        console.log(' Mensaje recibido:', message.type, 'activeUsers:', message.activeUsers);
 
         switch (message.type) {
             case 'user_info':
     this.user = message.user;
     this.updateUserInfo();
     
-    // ✅ AÑADIR: Actualizar lista de usuarios si viene en el mensaje
+    //  Actualizar lista de usuarios 
     if (message.activeUsers) {
-        console.log('✅ Recibiendo lista inicial de usuarios:', message.activeUsers);
+        console.log(' Recibiendo lista inicial de usuarios:', message.activeUsers);
         this.updateUserList(message.activeUsers);
     } else {
-        console.log('⚠️ user_info sin activeUsers, solicitando lista completa...');
-        // Si no viene, podrías pedirla al servidor
+        console.log(' user_info sin activeUsers, solicitando lista completa...');
+        // Si no se la pide al servidor
     }
     break;
                 
@@ -195,10 +195,10 @@ class Parlana {
                 break;
                 
             case 'username_changed':
-                console.log('🔄 Procesando cambio de nombre, activeUsers:', message.activeUsers);
+                console.log(' Procesando cambio de nombre, activeUsers:', message.activeUsers);
                 this.addSystemMessage(message.message);
                 
-                // ✅ ACTUALIZAR SOLO EL USUARIO QUE CAMBIÓ, NO BORRAR TODA LA LISTA
+                //  ACTUALIZAR SOLO EL USUARIO QUE CAMBIÓ, NO BORRAR TODA LA LISTA
                 this.updateSingleUser(message.user);
                 
                 if (this.user && message.user && message.user.id === this.user.id) {
@@ -279,11 +279,11 @@ class Parlana {
     }
 
     updateUserList(users) {
-    console.log('🔄 Actualizando lista de usuarios:', users);
+    console.log(' Actualizando lista de usuarios:', users);
     
-    // ✅ MEJORAR la validación
+    //  MEJORAR la validación
     if (!users || !Array.isArray(users) || users.length === 0) {
-        console.warn('⚠️ Lista de usuarios inválida o vacía, mostrando lista actual');
+        console.warn(' Lista de usuarios inválida o vacía, mostrando lista actual');
         // En lugar de no hacer nada, mostrar mensaje
         if (this.currentUserList.length === 0) {
             this.userList.innerHTML = '<li class="user-item">No hay usuarios conectados</li>';
@@ -291,7 +291,7 @@ class Parlana {
         return;
     }
     
-    // ✅ Guardar la lista actual
+    //  Guardar la lista actual
     this.currentUserList = users;
     
     this.userCount.textContent = users.length;
@@ -299,7 +299,7 @@ class Parlana {
     
     users.forEach(user => {
         if (!user || !user.id || !user.username) {
-            console.warn('⚠️ Usuario inválido:', user);
+            console.warn(' Usuario inválido:', user);
             return;
         }
         
@@ -319,17 +319,17 @@ class Parlana {
         this.userList.appendChild(userItem);
     });
     
-    console.log('✅ Lista de usuarios actualizada con', users.length, 'usuarios');
+    console.log(' Lista de usuarios actualizada con', users.length, 'usuarios');
 }
 
-    // ✅ NUEVO MÉTODO: Actualizar solo un usuario específico
+    //  Metodo Actualizar solo un usuario específico
     updateSingleUser(updatedUser) {
         if (!updatedUser || !updatedUser.id || !updatedUser.username) {
-            console.warn('⚠️ Usuario a actualizar inválido:', updatedUser);
+            console.warn(' Usuario a actualizar inválido:', updatedUser);
             return;
         }
         
-        console.log('🔄 Actualizando usuario:', updatedUser.username);
+        console.log(' Actualizando usuario:', updatedUser.username);
         
         // Buscar el usuario en la lista actual y actualizarlo
         let userFound = false;
@@ -353,13 +353,12 @@ class Parlana {
             }
         }
         
-        // Si no encontró el usuario, actualizar toda la lista (fallback)
+        // Si no encontró el usuario, actualizar toda la lista
         if (!userFound) {
-            console.log('⚠️ Usuario no encontrado en lista, solicitando lista completa...');
-            // En una implementación completa, aquí pedirías la lista al servidor
+            console.log(' Usuario no encontrado en lista, solicitando lista completa...');
         }
         
-        console.log('✅ Usuario actualizado en la lista');
+        console.log(' Usuario actualizado en la lista');
     }
 
     showTypingIndicator(user, isTyping) {
