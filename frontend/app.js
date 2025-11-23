@@ -114,7 +114,7 @@ class Parlana {
     
     this.addSystemMessage('Conectado al chat');
     
-    //  SOLICITAR LISTA DE USUARIOS SI NO LLEGA EN 2 SEGUNDOS
+    //  SOLICITAR LISTA DE USUARIOS SI NO CARGA 
     setTimeout(() => {
         if (this.currentUserList.length === 0) {
             console.log(' Solicitando lista de usuarios...');
