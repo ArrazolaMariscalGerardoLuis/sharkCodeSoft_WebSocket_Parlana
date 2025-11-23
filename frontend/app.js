@@ -198,7 +198,7 @@ class Parlana {
                 console.log(' Procesando cambio de nombre, activeUsers:', message.activeUsers);
                 this.addSystemMessage(message.message);
                 
-                //  ACTUALIZAR SOLO EL USUARIO QUE CAMBIÓ, NO BORRAR TODA LA LISTA
+                //  ACTUALIZAR SOLO EL USUARIO QUE CAMBIÓ DE NOMBRE, NO BORRARA TODA LA LISTA
                 this.updateSingleUser(message.user);
                 
                 if (this.user && message.user && message.user.id === this.user.id) {
